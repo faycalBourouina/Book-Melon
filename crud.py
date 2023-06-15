@@ -1,4 +1,4 @@
-from mode import User, Reservation
+from model import User, Reservation, db
 from utils import format_date, format_time
 
 def create_user(username):
@@ -34,29 +34,39 @@ def get_reservation_page(username):
     return reservations
 
 
-def add_reservation(username, reservation_date, start_time, end_time):
+def add_reservation(username, date, start_time, end_time):
     """Add a reservation to the user's reservations."""
     
     # Format the date and time strings into datetime objects
-    reservation_date = format_date(reservation_date)
-    start_time = format_time(reservation_date)
-    end_time = format_time(reservation_date)
+    date = format_date(date)
+    start_time = format_time(start_time)
+    end_time = format_time(end_time)
 
  # Check if any reservation exists on the specified date and time range
     existing_reservation = Reservation.query.filter(
-        Reservation.date == reservation_date,
+        Reservation.date == date,
         Reservation.start_date == start_time,
-        Reservation.end_date == end_time,
     ).first()
 
     if existing_reservation:
         return "reservation_exists"
 
+    # Find the user
+    user = User.query.filter_by(username=username).first()
+
+    # Check if the user already has a reservation on the specified date
+    existing_user_reservation = Reservation.query.filter_by(
+        user_id=user.id, date=date
+    ).first()
+
+
+    if existing_user_reservation:
+        return "user_reservation_exists"
 
     # Create a new reservation
     reservation = Reservation(
         user_id=user.id,
-        date=reservation_date,
+        date=date,
         start_date=start_time,
         end_date=end_time,
     )

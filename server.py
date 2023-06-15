@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, session, jsonify
+from utils import sqlalchemy_obj_to_dict
 import model
 import crud
 import os
@@ -34,7 +35,8 @@ def get_landing_page():
     if session.get("username"):
         username = session["username"]
         reservations = crud.get_reservation_page(username)
-        response  = jsonify({"reservations": reservations})
+        reservations_dict = [sqlalchemy_obj_to_dict(reservation) for reservation in reservations]
+        response  = jsonify({"reservations": reservations_dict})
         return response
     # Don't display the reservation page
     else:
@@ -83,18 +85,28 @@ def user_bookings(username):
     
     return f"Bookings for {username}"
 
-@app.route("/<username>/reservation/<reservation>", methods=["POST"])
-def add_reservation(username, resevation):
+@app.route("/<username>/reservation", methods=["POST"])
+def add_reservation(username):
     """ Add a reservation to the user's reseravation"""
 
     # Retrieve the request data
-    data = request.json
-    reservation_date = data.get("date")
-    start_time = data.get("start_time")
-    end_time = data.get("end_time")
+    date = request.form.get("date")
+    start_time = request.form.get("start_time")
+    end_time = request.form.get("end_time")
 
     # Add the reservation using the CRUD function
-    reservation = crud.add_reservation(username, reservation_date, start_time, end_time)
+    reservation = crud.add_reservation(username, date, start_time, end_time)
+
+    if reservation == "reservation_exists":
+        return jsonify({"message": "Reservation already exists"})
+    elif reservation == "user_reservation_exists":
+        return jsonify({"message": "User already has a reservation on this date"})
+    
+    model.db.session.add(reservation)
+    model.db.session.commit()
+    reservation_dict = sqlalchemy_obj_to_dict(reservation)
+    response = jsonify({"resrvation": reservation_dict})
+    return response
 
 
 if __name__ == '__main__':
