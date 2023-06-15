@@ -1,7 +1,8 @@
-from flask import Flask, request, render_template, session
+from flask import Flask, request, render_template, session, jsonify
 import model
 import crud
 import os
+import json
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -23,10 +24,21 @@ app.secret_key = os.getenv("SESSION_SECRET_KEY")
 @app.route("/")
 def hello():
     """ Displays the homepage"""
-
     return render_template("index.html")
 
+@app.route("/landing")
+def get_landing_page():
+    """ Displays the landing page"""
 
+    # If user is logged in, display the reservation page
+    if session.get("username"):
+        username = session["username"]
+        reservations = crud.get_reservation_page(username)
+        response  = jsonify({"reservations": reservations})
+        return response
+    # Don't display the reservation page
+    else:
+        return "Please log in to view your reservations"
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -72,11 +84,17 @@ def user_bookings(username):
     return f"Bookings for {username}"
 
 @app.route("/<username>/reservation/<reservation>", methods=["POST"])
-def user_booking(username, resevation):
+def add_reservation(username, resevation):
     """ Add a reservation to the user's reseravation"""
 
-    reservation = request.form.get("reservation")
-    return f"Reservation {reservation} added to {username}'s resrvations"
+    # Retrieve the request data
+    data = request.json
+    reservation_date = data.get("date")
+    start_time = data.get("start_time")
+    end_time = data.get("end_time")
+
+    # Add the reservation using the CRUD function
+    reservation = crud.add_reservation(username, reservation_date, start_time, end_time)
 
 
 if __name__ == '__main__':
