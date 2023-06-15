@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, session
 import model
+import crud
 import os
 from dotenv import load_dotenv
 
@@ -26,14 +27,35 @@ def hello():
     return render_template("index.html")
 
 
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    """ Creates a new user """
+
+    username = request.form.get("username")
+    new_user = crud.create_user(username)
+    # if the user doesn't already exist, add them to the database
+    if new_user:
+        session["username"] = username
+        model.db.session.add(new_user)
+        model.db.session.commit()
+        return f"User {username} created"
+    else:
+        return f"User {username} already exists"
+
+
 @app.route("/login", methods=["POST"])
 def login():
     """ Logs in the user """
 
     username = request.form.get("username")
-    session["username"] = username
-    print("username in session", session["username"])
-    return f"user {username} logged in"
+
+    existing_user = crud.authenticate_user(username)
+    if existing_user:
+        session["username"] = username
+        return f"User {username} logged in"
+    else:
+        return f"User {username} does not exist"
 
 @app.route("/logout")
 def logout():
