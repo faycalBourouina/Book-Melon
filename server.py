@@ -25,14 +25,17 @@ app.secret_key = os.getenv("SESSION_SECRET_KEY")
 @app.route("/")
 def hello():
     """ Displays the homepage"""
+    print("home page rendering")
     return render_template("index.html")
 
 @app.route("/landing")
 def get_landing_page():
     """ Displays the landing page"""
 
+    username = request.args.get("username")
+
     # If user is logged in, display the reservation page
-    if session.get("username"):
+    if session.get("username") == username:
         username = session["username"]
         reservations = crud.get_reservation_page(username)
         reservations_dict = [sqlalchemy_obj_to_dict(reservation) for reservation in reservations]
