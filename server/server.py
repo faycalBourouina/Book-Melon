@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, session, jsonify
+from flask import (Flask, request, render_template, session, jsonify)
 from utils import sqlalchemy_obj_to_dict
 import model
 import crud
@@ -26,7 +26,7 @@ app.secret_key = os.getenv("SESSION_SECRET_KEY")
 def hello():
     """ Displays the homepage"""
     print("home page rendering")
-    return render_template("index.html")
+    return "Hello Flask"
 
 @app.route("/landing")
 def get_landing_page():

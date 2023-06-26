@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Book Melon</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://unpkg.com/react-calendar/dist/Calendar.css" />
+  </head>
+    <body>
+        <div id="root"></div>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/react-calendar/umd/ReactCalendar.min.js"></script>
+
+        
+        <script src="https://unpkg.com/@mui/material@latest/umd/material-ui.development.js"></script>
+
+        <script>
+            import TextField from '@mui/material/TextField';
+            import AdapterDateFns from '@mui/lab/AdapterDateFns';
+            import LocalizationProvider from '@mui/lab/LocalizationProvider';
+            import DatePicker from '@mui/lab/DatePicker';
+        </script>
+
+        <script>
+        // Access the userSession value from Flask and assign it to a JavaScript variable
+        {% if session['user'] %}
+            var userName = {{session['username']}};
+            console.log("username: ", userName);
+        {% else %}
+            var userName = null;
+        {% endif %}
+        </script>
+        
+        <!-- React Components 
+        <script type="text/babel" src="/static/js/components/reservations.jsx"></script>
+        <script type="text/babel" src="/static/js/components/time-slot.jsx"></script>
+        <script type="text/babel" src="/static/js/components/search.jsx"></script>
+        <script type="text/babel" src="/static/js/components/authform.jsx"></script>
+        -->
+        
+        <script type="text/babel" src="/static/js/schedule.jsx"></script>
+        <script type="text/babel" src="/static/js/layout.jsx"></script>
+        <script type="text/babel" src="/static/js/app.jsx"></script>
+
+        <script type="text/babel">
+        ReactDOM.render(<App uesrName={userName} />, document.getElementById('root'));
+        </script>
+    </body>
+</html>
