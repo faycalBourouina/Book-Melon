@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -14,19 +14,28 @@ export default function ScheduleComponent() {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(
     dayjs().format('h:mm A')
   );
+  const [timeSlots, setTimeSlots] = useState([]);
 
-  // Generate an array of time slots with a 30-minute interval
-  const timeSlots = [];
-  for (let i = 0; i < 24; i++) {
-    const timeSlot1 = dayjs().hour(i).minute(0);
-    if (timeSlot1.isAfter(dayjs())) {
-      timeSlots.push(timeSlot1.format('h:mm A'));
+  // Function to generate an array of time slots with a 30-minute interval
+  const generateTimeSlots = (date) => {
+    const newTimeSlots = [];
+    for (let i = 0; i < 24; i++) {
+      const timeSlot1 = date.hour(i).minute(0);
+      if (timeSlot1.isAfter(dayjs())) {
+        newTimeSlots.push(timeSlot1.format('h:mm A'));
+      }
+      const timeSlot2 = date.hour(i).minute(30);
+      if (timeSlot2.isAfter(dayjs())) {
+        newTimeSlots.push(timeSlot2.format('h:mm A'));
+      }
     }
-    const timeSlot2 = dayjs().hour(i).minute(30);
-    if (timeSlot2.isAfter(dayjs())) {
-      timeSlots.push(timeSlot2.format('h:mm A'));
-    }
-  }
+    setTimeSlots(newTimeSlots);
+  };
+
+  // Call the generateTimeSlots function whenever the selected date changes
+  useEffect(() => {
+    generateTimeSlots(value);
+  }, [value]);
 
   // Function to handle clicks on the "Book" button
   const handleBookClick = async () => {
