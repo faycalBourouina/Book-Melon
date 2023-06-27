@@ -21,8 +21,8 @@ class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     date = db.Column(db.Date)
-    start_date = db.Column(db.Time)
-    end_date = db.Column(db.Time)
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
     user = db.relationship("User", back_populates="reservations")
 
 

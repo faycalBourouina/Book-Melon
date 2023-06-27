@@ -45,7 +45,7 @@ def add_reservation(username, date, start_time, end_time):
  # Check if any reservation exists on the specified date and time range
     existing_reservation = Reservation.query.filter(
         Reservation.date == date,
-        Reservation.start_date == start_time,
+        Reservation.start_time == start_time,
     ).first()
 
     if existing_reservation:
@@ -65,10 +65,10 @@ def add_reservation(username, date, start_time, end_time):
 
     # Create a new reservation
     reservation = Reservation(
-        user_id=user.id,
-        date=date,
-        start_date=start_time,
-        end_date=end_time,
+        user_id = user.id,
+        date = date,
+        start_time =start_time,
+        end_time = end_time,
     )
 
     return reservation
