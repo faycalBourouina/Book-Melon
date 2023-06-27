@@ -4,9 +4,11 @@ import model
 import crud
 import os
 import json
+from flask_cors import CORS
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+CORS(app)
 
 # connect to the database and create tables
 model.connect_to_db(app)
@@ -21,35 +23,29 @@ load_dotenv()
 app.secret_key = os.getenv("SESSION_SECRET_KEY")
 
 
-
 @app.route("/")
-def hello():
-    """ Displays the homepage"""
-    print("home page rendering")
-    return "Hello Flask"
-
-@app.route("/landing")
 def get_landing_page():
     """ Displays the landing page"""
 
     username = request.args.get("username")
 
     # If user is logged in, display the reservation page
-    if session.get("username") == username:
+    if "username" in session:
         username = session["username"]
         reservations = crud.get_reservation_page(username)
         reservations_dict = [sqlalchemy_obj_to_dict(reservation) for reservation in reservations]
         response  = jsonify({"reservations": reservations_dict})
-        return response
+        return response, 200
     # Don't display the reservation page
     else:
-        return "Please log in to view your reservations"
+        response = jsonify({"message": "User not logged in"})
+        return response, 401
 
 @app.route("/signup", methods=["POST"])
 def signup():
     """ Creates a new user """
 
-    username = request.form.get("username")
+    username = request.json.get("username")
     new_user = crud.create_user(username)
     # if the user doesn't already exist, add them to the database
     if new_user:
@@ -65,8 +61,8 @@ def signup():
 def login():
     """ Logs in the user """
 
-    username = request.form.get("username")
-
+    username = request.json.get("username")
+    print("username", username)
     existing_user = crud.authenticate_user(username)
     if existing_user:
         session["username"] = username
@@ -81,22 +77,31 @@ def logout():
     session.pop("username")
     return "user logged out"
 
-@app.route("/<username>/reservations")
-def user_bookings(username):
+@app.route("/reservations")
+def user_bookings():
     """ Displays the user's reservations """
-    print("username in session", session["username"])
-    
-    return f"Bookings for {username}"
+    if "username" in session:
+        username = session["username"]
+        reservations = crud.get_reservation_page(username)
+        reservations_dict = [sqlalchemy_obj_to_dict(reservation) for reservation in reservations]
+        response = jsonify({"reservations": reservations_dict})
+        return response, 200
+    else:
+        response = jsonify({"message": "User not logged in"})
+        return response, 401
 
-@app.route("/<username>/reservation", methods=["POST"])
-def add_reservation(username):
+@app.route("/reservations/reservation", methods=["POST"])
+def add_reservation():
     """ Add a reservation to the user's reseravation"""
 
     # Retrieve the request data
-    date = request.form.get("date")
-    start_time = request.form.get("start_time")
-    end_time = request.form.get("end_time")
+    date = request.json.get("date")
+    start_time = request.json.get("start_time")
+    end_time = request.json.get("end_time")
 
+    print("booking: ", date, start_time, end_time)
+
+    username = session["username"]
     # Add the reservation using the CRUD function
     reservation = crud.add_reservation(username, date, start_time, end_time)
 
@@ -113,4 +118,4 @@ def add_reservation(username):
 
 
 if __name__ == '__main__':
-        app.run(host="0.0.0.0", debug=True)
+        app.run(debug=True, port=8080)
