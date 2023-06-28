@@ -41,6 +41,15 @@ def get_landing_page():
         response = jsonify({"message": "User not logged in"})
         return response, 401
 
+@app.route("/reservations/all")
+def get_all_reservations():
+    """ Get all the reservations """
+
+    reservations = crud.get_all_reservations()
+    reservations_dict = [sqlalchemy_obj_to_dict(reservation) for reservation in reservations]
+    response = jsonify({"reservations": reservations_dict})
+    return response, 200
+
 @app.route("/signup", methods=["POST"])
 def signup():
     """ Creates a new user """
@@ -106,15 +115,17 @@ def add_reservation():
     reservation = crud.add_reservation(username, date, start_time, end_time)
 
     if reservation == "reservation_exists":
-        return jsonify({"message": "Reservation already exists"})
+        response = jsonify({"message": "Reservation already exists"})
+        return response, 400
     elif reservation == "user_reservation_exists":
-        return jsonify({"message": "User already has a reservation on this date"})
+        response = jsonify({"message": "User already has a reservation on this date"})
+        return response, 400
     
     model.db.session.add(reservation)
     model.db.session.commit()
     reservation_dict = sqlalchemy_obj_to_dict(reservation)
     response = jsonify({"resrvation": reservation_dict})
-    return response
+    return response, 200
 
 
 if __name__ == '__main__':

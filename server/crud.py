@@ -1,6 +1,13 @@
 from model import User, Reservation, db
 from utils import format_date, format_time
 
+def get_all_reservations():
+    """ Get all the reservations """
+
+    reservations = Reservation.query.all()
+
+    return reservations
+
 def create_user(username):
     """ Create and return a new user """
     # Verify that the user doesn't already exist
